@@ -44,14 +44,12 @@ def h52zarr_xarray(h5_dir, fn_zarr, chunk={'time':3000, 'distance':3000}):
     for file in tqdm(files):
         
         hf = h5py.File(file)
+        
 
         ds = xr.Dataset({
-            'RawData':((['distance', 'time'], hf['Acquisition']['Raw[0]']['RawData'][:])),
-            'RawDataTime':('time', hf['Acquisition']['Raw[0]']['RawDataTime'][:]),
-            'GpBits':('time', hf['Acquisition']['Raw[0]']['Custom']['GpBits']),
-            'GpsStatus':('time', hf['Acquisition']['Raw[0]']['Custom']['GpsStatus']),
-            'PpsOffset':('time', hf['Acquisition']['Raw[0]']['Custom']['PpsOffset']),
-            'SampleCount':('time', hf['Acquisition']['Raw[0]']['Custom']['SampleCount'])}
+            'RawData':((['time', 'distance'], hf['Acquisition']['Raw[0]']['RawData'][:])),
+            'RawDataSampleCount':('time', hf['Acquisition']['Raw[0]']['RawDataSampleCount'][:]),
+            'RawDataTime':('time', hf['Acquisition']['Raw[0]']['RawDataTime'])}
         )
         
         ds = ds.chunk({'time':3000, 'distance':3000})
