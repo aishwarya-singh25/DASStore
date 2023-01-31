@@ -42,23 +42,24 @@ def h52zarr_xarray(h5_dir, fn_zarr, chunk={'time':3000, 'distance':3000}):
     first_loop=True
 
     for file in tqdm(files):
-        
-        hf = h5py.File(file)
-        
-
-        ds = xr.Dataset({
-            'RawData':((['time', 'distance'], hf['Acquisition']['Raw[0]']['RawData'][:])),
-            'RawDataSampleCount':('time', hf['Acquisition']['Raw[0]']['RawDataSampleCount'][:]),
-            'RawDataTime':('time', hf['Acquisition']['Raw[0]']['RawDataTime'])}
-        )
-        
-        ds = ds.chunk({'time':3000, 'distance':3000})
-        
-        # create new zarr store if beginning of loop otherwize, append in time dimension
-        if first_loop:
-            first_loop = False
-            ds.to_zarr(fn_zarr, mode='w-')
+        if file.endswith(".h5"):
+            hf = h5py.File(file)
+            
+            ds = xr.Dataset({
+                'RawData':((['time', 'distance'], hf['Acquisition']['Raw[0]']['RawData'][:])),
+                'RawDataSampleCount':('time', hf['Acquisition']['Raw[0]']['RawDataSampleCount'][:]),
+                'RawDataTime':('time', hf['Acquisition']['Raw[0]']['RawDataTime'])}
+            )
+            
+            ds = ds.chunk({'time':3000, 'distance':3000})
+            
+            # create new zarr store if beginning of loop otherwize, append in time dimension
+            if first_loop:
+                first_loop = False
+                ds.to_zarr(fn_zarr, mode='w-')
+            else:
+                ds.to_zarr(fn_zarr, append_dim='time')
         else:
-            ds.to_zarr(fn_zarr, append_dim='time')
+            pass
 
     return
